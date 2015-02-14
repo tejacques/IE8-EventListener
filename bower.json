@@ -1,0 +1,25 @@
+{
+  "name": "ie8-eventlistener",
+  "version": "0.1.0",
+  "homepage": "https://github.com/tejacques/IE8-EventListener",
+  "authors": [
+    "Tom Jacques"
+  ],
+  "description": "An polyfill for EventListeners.",
+  "main": [
+    "./src/storage/util.js",
+    "./src/storage.js",
+    "./src/ie8-eventlistener.js"
+  ],
+  "keywords": [
+    "IE8",
+    "polyfill",
+    "shim",
+    "eventListener",
+    "addEventListener"
+  ],
+  "license": "CC0 1.0 Universal",
+  "moduleType": [
+    "cjs"
+  ]
+}

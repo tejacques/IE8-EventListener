@@ -1,15 +1,18 @@
-'use strict';
-var storage = require('./storage');
-var utils = require('./storage/util');
-var _storage_key_prefix = utils.prefix;
-var _storage_keys_set = utils.sent;
-var _storage_key = utils.storageKey;
-var _storage_key_timeout = utils.timeout;
+; (function (define) { define('ie8-eventlistener', function (require, exports, module) {
+    'use strict';
+    var storage = require('storage');
+    var utils = require('storage/util');
+    var _storage_key_prefix = utils.prefix;
+    var _storage_keys_set = utils.sent;
+    var _storage_key = utils.storageKey;
+    var _storage_key_timeout = utils.timeout;
 
-if (typeof Element !== 'undefined'
-    && !Element.prototype.addEventListener
-    && !Element.prototype.attachEvent
-    ) {
+    if (typeof Element == 'undefined'
+        || Element.prototype.addEventListener
+        || !Element.prototype.attachEvent
+        ) {
+        return;
+    }
 
     var clone = (function () {
         var Temp = function () { };
@@ -18,13 +21,13 @@ if (typeof Element !== 'undefined'
                 throw Error('Second argument not supported');
             }
             if (typeof prototype != 'object') {
-                throw TypeError('Argument must be an object');
+                throw new TypeError('Argument must be an object');
             }
             Temp.prototype = prototype;
             var result = new Temp();
             Temp.prototype = null;
 
-            for (k in prototype) {
+            for (var k in prototype) {
                 if (k in result) {
                     break;
                 }
@@ -48,11 +51,9 @@ if (typeof Element !== 'undefined'
         }
 
         return -1;
-    }
+    };
 
     var binaryIndexOf = function (searchElement) {
-        'use strict';
-
         var minIndex = 0;
         var maxIndex = this.length - 1;
         var currentIndex;
@@ -75,10 +76,10 @@ if (typeof Element !== 'undefined'
         }
 
         return -(minIndex + 1);
-    }
+    };
 
     var getLocalStorageKeys = function () {
-        var keys = []
+        var keys = [];
         for (var i = 0, len = localStorage.length; i < len; i++) {
             var key = localStorage.key(i);
             var splits = key.split('-');
@@ -97,7 +98,7 @@ if (typeof Element !== 'undefined'
 
         keys.sort();
         return keys;
-    }
+    };
 
     var _keys = getLocalStorageKeys();
     var _last_key = _keys.length === 0 ? '' : _keys[_keys.length - 1].key;
@@ -117,10 +118,10 @@ if (typeof Element !== 'undefined'
     };
 
     var addToPrototype = function (name, method) {
-        HTMLDocument.prototype[name] = method;
         Window.prototype[name] = method;
+        HTMLDocument.prototype[name] = method;
         Element.prototype[name] = method;
-    }
+    };
 
     // Pulled from http://www.quirksmode.org/dom/events/index.html
     // The following events are not targetable on the window, so switch
@@ -146,10 +147,10 @@ if (typeof Element !== 'undefined'
     addToPrototype('addEventListener', function (type, listener) {
         var target = this;
         var element = this;
-        if (target === window && type in shouldTargetDocument) {
+        var isWindow = target === window || target instanceof Window;
+        if (isWindow && type in shouldTargetDocument) {
             target = document;
         }
-
 
         if (!target._events) {
             target._events = {};
@@ -197,6 +198,7 @@ if (typeof Element !== 'undefined'
                     // structure since event is a special object
                     var eventClone = clone(event);
                     var eventLength = eventList.length;
+
                     for (eventIndex = 0; eventIndex < eventLength; eventIndex++) {
                         var ev = eventList[eventIndex];
                         for (index = 0; index < length && !event.cancelImmediate; index++) {
@@ -220,7 +222,7 @@ if (typeof Element !== 'undefined'
                             }
                         }
                     }
-                }
+                };
 
                 if (type === "storage" || type === "storagecommit") {
 
@@ -258,7 +260,7 @@ if (typeof Element !== 'undefined'
                         }
 
                         callEventHandlers();
-                    }
+                    };
 
                     // This setTimeout call is necessary
                     // if it were missing IE8 localStorage
@@ -315,7 +317,13 @@ if (typeof Element !== 'undefined'
             throw new Error('DOM Events Exception 0');
         }
 
-        var element = this, type = event.type;
+        var element = this;
+        var target = this;
+        var type = event.type;
+        var isWindow = target === window || target instanceof Window;
+        if (isWindow && type in shouldTargetDocument) {
+            target = document;
+        }
 
         try {
             if (!event.bubbles) {
@@ -324,21 +332,21 @@ if (typeof Element !== 'undefined'
                 var cancelBubbleEvent = function (event) {
                     event.cancelBubble = true;
 
-                    (element || window).detachEvent('on' + type, cancelBubbleEvent);
+                    target.detachEvent('on' + type, cancelBubbleEvent);
                 };
 
-                this.attachEvent('on' + type, cancelBubbleEvent);
+                target.attachEvent('on' + type, cancelBubbleEvent);
             }
 
-            this.fireEvent('on' + type, event);
+            target.fireEvent('on' + type, event);
         } catch (error) {
             event.target = element;
 
             do {
                 event.currentTarget = element;
 
-                if ('_events' in element && typeof target._events[type] === 'function') {
-                    target._events[type].call(element, event);
+                if ('_events' in element && typeof element._events[type] === 'function') {
+                    element._events[type].call(element, event);
                 }
 
                 if (typeof element['on' + type] === 'function') {
@@ -351,4 +359,35 @@ if (typeof Element !== 'undefined'
 
         return true;
     });
-}
+/*!
+ * UMD/AMD/Global context Module Loader wrapper
+ * based off https://gist.github.com/wilsonpage/8598603
+ *
+ * This wrapper will try to use a module loader with the
+ * following priority:
+ *
+ *  1.) AMD
+ *  2.) CommonJS
+ *  3.) Context Variable (window in the browser)
+ */
+});})(typeof define == 'function' && define.amd ? define
+    : (function (context) {
+        'use strict';
+        return typeof module == 'object' ? function (name, factory) {
+            factory(require, exports, module);
+        }
+        : function (name, factory) {
+            var module = {
+                exports: {}
+            };
+            var require = function (n) {
+                if (n === 'jquery') {
+                    n = 'jQuery';
+                }
+                return context[n];
+            };
+
+            factory(require, module.exports, module);
+            context[name] = module.exports;
+        };
+    })(this));
