@@ -2,7 +2,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
-            files: ['Gruntfile.js', 'src/*.js'],
+            files: ['Gruntfile.js', 'src/*.js', 'tests/**/*.js'],
             options: {
                 laxbreak: true
             }
@@ -10,7 +10,7 @@ module.exports = function (grunt) {
         watch: {
             scripts: {
                 files: ['<%= jshint.files %>'],
-                tasks: ['jshint']
+                tasks: ['jshint', 'shell:trifle']
             }
         },
         connect: {
@@ -21,11 +21,18 @@ module.exports = function (grunt) {
                     base: '.'
                 }
             }
+        },
+        shell: {
+            trifle: {
+                command: 'echo bin/TrifleJS.exe \-\-emulate=IE8 tests/trifle/ie8.js | bash'
+            }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-shell');
 
     grunt.registerTask('default', ['connect', 'watch']);
+    grunt.registerTask('test', ['connect', 'shell:trifle']);
 };
