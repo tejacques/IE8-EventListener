@@ -13,8 +13,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define "win7" do |win7|
     # http://blog.syntaxc4.net/post/2014/09/03/windows-boxes-for-vagrant-courtesy-of-modern-ie.aspx
-    win7.vm.box = "vagrant-win7-ie8-updated"
-    # win7.vm.box_url = "http://aka.ms/vagrant-win7-ie8-updated"
+    win7.vm.box = "vagrant-win7-ie8"
+    win7.vm.box_url = "http://aka.ms/vagrant-win7-ie8"
     win7.vm.guest = :windows
 
     win7.vm.network :forwarded_port, guest: 3389, host: 3391
@@ -30,11 +30,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     win7.winrm.username = "IEUser"
     win7.winrm.password = "Passw0rd!"
- 
+
     # We don't want the default headless mode
     win7.vm.provider "virtualbox" do |vb|
-      vb.name = "vagrant_win7_ie8_updated"
+      vb.name = "vagrant_win7_ie8"
       vb.gui = true
+      vb.customize('post-comm', ['guestcontrol', :id, 'exec', '--username', 'IEUser', '--password', 'Passw0rd!', 'C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe', '--', 'Set-ExecutionPolicy', 'ByPass', '-Force'])
+      vb.customize('post-comm', ['guestcontrol', :id, 'exec', '--username', 'IEUser', '--password', 'Passw0rd!', 'C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe', '--', '\\\\VBOXSVR\vagrant\scripts\install_vcpp_redistributable.ps1'])
     end
   end
 end
