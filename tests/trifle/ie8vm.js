@@ -1,6 +1,6 @@
-﻿console.log("Running TrifleJS Tests");
+﻿console.log("Running TrifleJS Tests\n\n");
 var page = require('webpage').create();
-var url = "http://localhost:9000";
+var url = "http://192.168.50.1:9000";
 var padRight = function (str, paddingValue, padChars) {
     var pad = paddingValue;
     while(pad.length + str.length < padChars) {
@@ -18,7 +18,7 @@ var test = function (name, fn) {
     var val = tests[name];
     //console.log(tests);
     //console.log(name + ': ' + val);
-    console.log(padRight(name, ' ', 40) + ': ' + val);
+    console.log(padRight(name, ' ', 40) + ': ' + val + '\n');
 };
 var printTests = function () {
     var testNum = 0;
@@ -30,7 +30,7 @@ var printTests = function () {
             testPass++;
         }
     }
-    console.log('\nPassing: ' + testPass + '/' + testNum);
+    console.log('\nPassing: ' + testPass + '/' + testNum+'\n');
 };
 var finalize = function () {
     printTests();
@@ -59,10 +59,7 @@ page.open(url, function (status) {
             return len == 3;
         });
 
-        console.log('about to run setTimeout');
-
         setTimeout(function () {
-            console.log('in setTimeout');
             //console.log("retrieving DOM");
             var numP = page.evaluate(function () {
                 return document.querySelectorAll('p').length;

@@ -24,7 +24,10 @@ module.exports = function (grunt) {
         },
         shell: {
             trifle: {
-                command: 'echo bin/TrifleJS.exe \-\-emulate=IE8 tests/trifle/ie8.js | bash'
+                command: 'bash scripts/run_vm_tests.sh',
+                options: {
+                    stdin: false
+                }
             }
         }
     });
