@@ -43,7 +43,7 @@ wait_for_guestcontrol() {
 
 wait_for_guestcontrol
 sleep 10
-python keycode_creator.py | bash
+node keycode_creator.js | bash
 #PS1SCRIPT=$(cat VAGRANT_VM_SETUP.ps1 | sed 's/#.*//g' | tr '\n' ' ')
 #vbm vagrant_win7_ie8 --timeout 5000 'C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe' "pwd; pwd"
 #vbm vagrant_win7_ie8 --timeout 5000 'C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe' "pwd"
