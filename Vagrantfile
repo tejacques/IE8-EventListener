@@ -35,8 +35,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     win7.vm.provider "virtualbox" do |vb|
       vb.name = "vagrant_win7_ie8"
       vb.gui = true
-      vb.customize('post-comm', ['guestcontrol', :id, 'exec', '--username', 'IEUser', '--password', 'Passw0rd!', 'C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe', '--', 'Set-ExecutionPolicy', 'ByPass', '-Force'])
-      vb.customize('post-comm', ['guestcontrol', :id, 'exec', '--username', 'IEUser', '--password', 'Passw0rd!', 'C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe', '--', '\\\\VBOXSVR\vagrant\scripts\install_vcpp_redistributable.ps1'])
     end
   end
 end

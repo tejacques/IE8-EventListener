@@ -1,6 +1,9 @@
-﻿console.log("Running TrifleJS Tests\n\n");
 var page = require('webpage').create();
 var url = "http://192.168.50.1:9000";
+var log = function() {
+    console.log.apply(console, arguments);
+    console.log('');
+};
 var padRight = function (str, paddingValue, padChars) {
     var pad = paddingValue;
     while(pad.length + str.length < padChars) {
@@ -9,16 +12,28 @@ var padRight = function (str, paddingValue, padChars) {
     return String(str + pad).slice(0, str.length + padChars);
 };
 var tests = {};
-var test = function (name, fn) {
+
+log('Running TrifleJS Tests');
+log('');
+
+
+var test = function (name, expected, actualFn) {
+    var val;
+    var actual;
     try {
-        tests[name] = fn();
+        actual = actualFn();
+        val = expected === actual;
     } catch (e) {
-        tests[name] = false;
+        actual = e;
+        val = false;
     }
-    var val = tests[name];
-    //console.log(tests);
-    //console.log(name + ': ' + val);
-    console.log(padRight(name, ' ', 40) + ': ' + val + '\n');
+    tests[name] = val;
+    var padded = padRight(name, ' ', 40) + ': ';
+    if (val) {
+        log(padded + 'pass');
+    } else {
+        log(padded + 'fail, expected: ' + expected + ' but was: ' + actual);
+    }
 };
 var printTests = function () {
     var testNum = 0;
@@ -30,49 +45,73 @@ var printTests = function () {
             testPass++;
         }
     }
-    console.log('\nPassing: ' + testPass + '/' + testNum+'\n');
+    log('');
+    log('Passing: ' + testPass + '/' + testNum);
 };
+
 var finalize = function () {
-    printTests();
-    page.evaluate(function () {
-        localStorage.clear();
+    
+    test('storage should be clear', 0, function () {
+        return page.evaluate(function () {
+            localStorage.clear();
+            return localStorage.length;
+        });
     });
+    printTests();
     phantom.exit();
 };
 page.open(url, function (status) {
     try {
-
-        test('page loaded', function () {
-            return status === 'success';
+        test('page loaded successfully', 'success', function () {
+            return status;
         });
 
-        test('localStorage written correctly', function () {
-            var len = page.evaluate(function () {
+        test('localStorage is object', 'object', function() {
+            return page.evaluate(function() {
+                return typeof window.localStorage;
+            });
+        });
+
+        test('browser is IE8', 8, function () {
+            return page.evaluate(function() {
+                var getInternetExplorerVersion = function() {
+                    // Returns the version of Internet Explorer or a -1
+                    // (indicating the use of another browser).
+                    var rv = -1; // Return value assumes failure.
+                    if (navigator.appName == 'Microsoft Internet Explorer') {
+                        var ua = navigator.userAgent;
+                        var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+                        if (re.exec(ua) !== null) {
+                            rv = parseFloat( RegExp.$1 );
+                        }
+                    }
+                    return rv;
+                };
+
+                return getInternetExplorerVersion();
+            });
+        });
+
+        test('localStorage written correctly', 3, function () {
+            return page.evaluate(function () {
                 localStorage.clear();
                 var btn = document.getElementById('send2');
                 btn.onclick();
                 window.dispatchEvent(new Event('storage'));
                 return localStorage.length;
             });
-
-            //console.log('len: ' + len);
-            return len == 3;
         });
 
         setTimeout(function () {
-            //console.log("retrieving DOM");
-            var numP = page.evaluate(function () {
-                return document.querySelectorAll('p').length;
-                // return document.body.innerHTML
-            });
-            //console.log('# p tags: ' + numP)
-            test('storage events handled correctly', function () {
-                return numP == 2;
+            test('storage events handled correctly', 2, function () {
+                return page.evaluate(function () {
+                    return document.querySelectorAll('p').length;
+                });
             });
             finalize();
         }, 1000);
     } catch (e) {
-        console.log("error", e);
+        log("error", e);
         phantom.exit();
     }
 });

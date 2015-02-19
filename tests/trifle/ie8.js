@@ -1,4 +1,4 @@
-﻿console.log("Running TrifleJS Tests");
+console.log("Running TrifleJS Tests");
 var page = require('webpage').create();
 var url = "http://localhost:9000";
 var padRight = function (str, paddingValue, padChars) {
