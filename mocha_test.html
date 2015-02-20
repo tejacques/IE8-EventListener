@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>IE8-EventListener Mocha Tests</title>
+        <meta charset="utf=8">
+        <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+    </head>
+    <body>
+        <div id="mocha"></div>
+        <script src="https://cdn.polyfill.io/v1/polyfill.js?features=Object.create,Array.prototype.indexOf,Array.prototype.forEach,Object.getOwnPropertyNames&flags=always"></script>
+        <script src="../node_modules/mocha/mocha.js"></script>
+        <script src="../node_modules/expect.js/index.js"></script>
+        <script>
+          mocha.ui('bdd');
+          mocha.reporter('html');
+        </script>
+        <script src="src/storage/util.js"></script>
+        <script src="src/storage.js"></script>
+        <script src="src/ie8-eventlistener.js"></script>
+        <script src="tests/test-ie8-eventlistener.js"></script>
+        <script>
+          if (window.mochaPhantomJS) {
+            mochaPhantomJS.run();
+          } else {
+            mocha.run();
+          }
+        </script>
+    </body>
+</html>

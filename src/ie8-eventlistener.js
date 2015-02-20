@@ -1,11 +1,11 @@
 ; (function (define) { define('ie8-eventlistener', function (require, exports, module) {
     'use strict';
     var storage = require('storage');
-    var utils = require('storage/util');
-    var _storage_key_prefix = utils.prefix;
-    var _storage_keys_set = utils.sent;
-    var _storage_key = utils.storageKey;
-    var _storage_key_timeout = utils.timeout;
+    var util = require('storage/util');
+    var _storage_key_prefix = util.prefix;
+    var _storage_keys_set = util.sent;
+    var _storage_key = util.storageKey;
+    var _storage_key_timeout = util.timeout;
 
     if (typeof Element == 'undefined'
         || Element.prototype.addEventListener
@@ -44,7 +44,8 @@
         for (index = 0; index < length; index++) {
             if (index in array) {
                 if ((property && array[index][property] === element)
-                    || array[index] === element) {
+                    || (!property && array[index] === element)
+                ) {
                     return index;
                 }
             }
@@ -78,28 +79,7 @@
         return -(minIndex + 1);
     };
 
-    var getLocalStorageKeys = function () {
-        var keys = [];
-        for (var i = 0, len = localStorage.length; i < len; i++) {
-            var key = localStorage.key(i);
-            var splits = key.split('-');
-            if (splits[0] === _storage_key_prefix) {
-                var timestamp = parseFloat(splits[1]);
-                keys.push({
-                    timestamp: timestamp,
-                    key: key,
-                    // override valueOf function to make value comparison work for binaryIndexOf
-                    valueOf: function () { return this.key; },
-                    // override toString to make default sort method correct and fast
-                    toString: function () { return this.key.toString(); }
-                });
-            }
-        }
-
-        keys.sort();
-        return keys;
-    };
-
+    var getLocalStorageKeys = util.getLocalStorageKeys;
     var _keys = getLocalStorageKeys();
     var _last_key = _keys.length === 0 ? '' : _keys[_keys.length - 1].key;
 
@@ -144,11 +124,14 @@
         "dblclick": 1
     };
 
+    var isWindow = function(target) {
+        return target === window || target instanceof Window;
+    };
+
     addToPrototype('addEventListener', function (type, listener) {
         var target = this;
         var element = this;
-        var isWindow = target === window || target instanceof Window;
-        if (isWindow && type in shouldTargetDocument) {
+        if (isWindow(target) && type in shouldTargetDocument) {
             target = document;
         }
 
@@ -270,12 +253,9 @@
                     eventList.push(null);
                     callEventHandlers();
                 }
-
-
             };
 
             target._events[type].list = [];
-
             if (target.attachEvent) {
                 target.attachEvent('on' + type, target._events[type]);
             }
@@ -289,7 +269,7 @@
         var target = this;
         var index;
 
-        if (target === window && type in shouldTargetDocument) {
+        if (isWindow(target) && type in shouldTargetDocument) {
             target = document;
         }
 
@@ -303,6 +283,8 @@
                     if (target.detachEvent) {
                         target.detachEvent('on' + type, target._events[type]);
                     }
+
+                    delete target._events[type];
                 }
             }
         }
@@ -320,8 +302,7 @@
         var element = this;
         var target = this;
         var type = event.type;
-        var isWindow = target === window || target instanceof Window;
-        if (isWindow && type in shouldTargetDocument) {
+        if (isWindow() && type in shouldTargetDocument) {
             target = document;
         }
 

@@ -8,13 +8,15 @@
 
     var storageSetItem = function (key, val) {
         var oldValue = window.localStorage.getItem(key);
-
+        if (val === undefined) {
+            val = null;
+        }
         if (val !== null || oldValue !== null) {
             var storageKey = _storage_key();
             window.localStorage.setItem(storageKey, JSON.stringify({
                 key: key,
                 oldValue: oldValue,
-                newValue: val
+                newValue: (val === null) ? null : val.toString()
             }));
 
             setTimeout(function () {
@@ -34,6 +36,9 @@
         removeItem: function (key) {
             storageSetItem(key, null);
             window.localStorage.removeItem(key);
+        },
+        clear: function() {
+           window.localStorage.clear();
         }
     } : window.localStorage;
 
