@@ -10,9 +10,21 @@ var Reporter,
         return function () {
             return fn.apply(me, arguments);
         };
-    };
+    },
+    sysargs;
 
 system = require('system');
+var jsfileIndex;
+for(var idx=0; idx < system.args.length; idx++) {
+    if (/\.js/.test(system.args[idx])) {
+        jsfileIndex = idx;
+    }
+};
+
+sysargs = system.args.slice(jsfileIndex);
+sysargs.forEach(function(arg, index) {
+    console.log('arg ' + index + ': ' + arg);
+});
 
 webpage = require('webpage');
 
@@ -28,7 +40,7 @@ Reporter = (function () {
         this.waitForRunMocha = bind(this.waitForRunMocha, this);
         this.waitForInitMocha = bind(this.waitForInitMocha, this);
         this.waitForMocha = bind(this.waitForMocha, this);
-        this.url = system.args[1];
+        this.url = sysargs[1];
         this.columns = parseInt(system.env.COLUMNS || 75) * 0.75 | 0;
         this.mochaStartWait = this.config.timeout || 6000;
         this.startTime = Date.now();
@@ -315,9 +327,9 @@ Reporter = (function () {
 //    phantom.exit(-1);
 //}
 
-reporter = system.args[2] || 'spec';
+reporter = sysargs[2] || 'spec';
 
-config = JSON.parse(system.args[3] || '{}');
+config = JSON.parse(sysargs[3] || '{}');
 
 if (config.hooks) {
     config.hooks = require(config.hooks);
