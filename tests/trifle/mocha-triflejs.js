@@ -19,7 +19,7 @@ for(var idx=0; idx < system.args.length; idx++) {
     if (/\.js/.test(system.args[idx])) {
         jsfileIndex = idx;
     }
-};
+}
 
 sysargs = system.args.slice(jsfileIndex);
 sysargs.forEach(function(arg, index) {
@@ -129,6 +129,7 @@ Reporter = (function () {
         })(this);
         return (this.page.onInitialized = (function (_this) {
             return function () {
+                console.log("adding mochaPhantomJS to page");
                 return _this.page.evaluate(function (env) {
                     return (window.mochaPhantomJS = {
                         env: env,
@@ -149,18 +150,20 @@ Reporter = (function () {
     };
 
     Reporter.prototype.loadPage = function () {
+        console.log("loading page");
         this.page.open(this.url);
-        this.page.onLoadFinished = (function (_this) {
-            return function (status) {
-                _this.page.onLoadFinished = function () { };
-                if (status !== 'success') {
-                    _this.onLoadFailed();
-                }
-                return _this.waitForInitMocha();
-            };
-        })(this);
+        var _this = this;
+        this.page.onLoadFinished = function (status) {
+            console.log('load finished');
+            _this.page.onLoadFinished = function () { };
+            if (status !== 'success') {
+                _this.onLoadFailed();
+            }
+            return _this.waitForInitMocha();
+        };
         return (this.page.onCallback = (function (_this) {
             return function (data) {
+                console.log('received callback');
                 if (data ? data.hasOwnProperty('Mocha.process.stdout.write') : void 0) {
                     _this.output.write(data['Mocha.process.stdout.write']);
                 } else if (data ? data.hasOwnProperty('mochaPhantomJS.run') : void 0) {
@@ -254,12 +257,14 @@ Reporter = (function () {
             }
             return this.finish();
         } else {
+            console.log('setTimeout1');
             return setTimeout(this.waitForMocha, 100);
         }
     };
 
     Reporter.prototype.waitForInitMocha = function () {
         if (!this.checkStarted()) {
+            console.log('setTimeout2');
             return setTimeout(this.waitForInitMocha, 100);
         }
     };
@@ -268,6 +273,7 @@ Reporter = (function () {
         if (this.checkStarted()) {
             return this.runMocha();
         } else {
+            console.log('setTimeout3');
             return setTimeout(this.waitForRunMocha, 100);
         }
     };
@@ -277,6 +283,7 @@ Reporter = (function () {
         started = this.page.evaluate(function () {
             return mochaPhantomJS.started;
         });
+        var mochaPhantom 
         if (!started && this.mochaStartWait && this.startTime + this.mochaStartWait < Date.now()) {
             this.fail("Failed to start mocha: Init timeout", 255);
         }
