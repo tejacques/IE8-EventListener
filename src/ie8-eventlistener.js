@@ -125,7 +125,7 @@
     };
 
     var isWindow = function(target) {
-        return target === window || target instanceof Window;
+        return (target === window || target instanceof Window);
     };
 
     addToPrototype('addEventListener', function (type, listener) {
@@ -302,7 +302,7 @@
         var element = this;
         var target = this;
         var type = event.type;
-        if (isWindow() && type in shouldTargetDocument) {
+        if (isWindow(target) && type in shouldTargetDocument) {
             target = document;
         }
 
