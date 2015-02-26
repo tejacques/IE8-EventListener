@@ -283,7 +283,6 @@ Reporter = (function () {
         started = this.page.evaluate(function () {
             return mochaPhantomJS.started;
         });
-        var mochaPhantom 
         if (!started && this.mochaStartWait && this.startTime + this.mochaStartWait < Date.now()) {
             this.fail("Failed to start mocha: Init timeout", 255);
         }

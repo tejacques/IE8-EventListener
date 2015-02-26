@@ -1,4 +1,4 @@
-var page = require('webpage').create();
+﻿var page = require('webpage').create();
 var url = "http://192.168.50.1:9000";
 var log = function() {
     console.log.apply(console, arguments);
@@ -109,7 +109,7 @@ page.open(url, function (status) {
                 });
             });
             finalize();
-        }, 1000);
+        }, 2000);
     } catch (e) {
         log("error", e);
         phantom.exit();

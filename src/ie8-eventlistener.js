@@ -84,10 +84,11 @@
     var _last_key = _keys.length === 0 ? '' : _keys[_keys.length - 1].key;
 
     window.Event = Window.prototype.Event = function Event(type, eventInitDict) {
-        if (!type) {
-            throw new Error('Not enough arguments');
+        if (typeof type == 'undefined') {
+            throw new Error("Failed to construct 'Event': An event name must be provided.");
         }
 
+        type = String(type);
         var event = document.createEventObject();
 
         event.type = type;
@@ -129,19 +130,25 @@
     };
 
     addToPrototype('addEventListener', function (type, listener) {
+        if (!listener
+            || typeof listener !== 'function') {
+            return;
+        }
+
+        type = String(type);
         var target = this;
         var element = this;
         if (isWindow(target) && type in shouldTargetDocument) {
             target = document;
         }
 
-        if (!target._events) {
-            target._events = {};
+        if (!element._events) {
+            element._events = {};
         }
 
-        if (!target._events[type]) {
-            target._events[type] = function (event) {
-                var list = target._events[event.type].list;
+        if (!element._events[type]) {
+            element._events[type] = function (event) {
+                var list = element._events[event.type].list;
                 var events = list.slice();
                 var index = -1;
                 var length = events.length;
@@ -255,16 +262,23 @@
                 }
             };
 
-            target._events[type].list = [];
+            element._events[type].list = [];
             if (target.attachEvent) {
-                target.attachEvent('on' + type, target._events[type]);
+                target.attachEvent('on' + type, element._events[type]);
             }
         }
 
-        target._events[type].list.push(listener);
+        element._events[type].list.push(listener);
     });
 
     addToPrototype("removeEventListener", function (type, listener) {
+        if (!listener
+            || typeof listener !== 'function') {
+            return;
+        }
+
+        type = String(type);
+
         var element = this;
         var target = this;
         var index;
@@ -273,18 +287,18 @@
             target = document;
         }
 
-        if (target._events && target._events[type] && target._events[type].list) {
-            index = indexOf(target._events[type].list, listener);
+        if (element._events && element._events[type] && element._events[type].list) {
+            index = indexOf(element._events[type].list, listener);
 
             if (index !== -1) {
-                target._events[type].list.splice(index, 1);
+                element._events[type].list.splice(index, 1);
 
-                if (!target._events[type].list.length) {
+                if (!element._events[type].list.length) {
                     if (target.detachEvent) {
-                        target.detachEvent('on' + type, target._events[type]);
+                        target.detachEvent('on' + type, element._events[type]);
                     }
 
-                    delete target._events[type];
+                    delete element._events[type];
                 }
             }
         }
@@ -310,16 +324,21 @@
             if (!event.bubbles) {
                 event.cancelBubble = true;
 
-                var cancelBubbleEvent = function (event) {
-                    event.cancelBubble = true;
+                // What does this actually do?
+                // Order of execution of attached events
+                // isn't in the spec, so this is pointless,
+                // also the event cloning method should
+                // ensure cancelBubble is always set to true.
+                //var cancelBubbleEvent = function (event) {
+                //    event.cancelBubble = true;
 
-                    target.detachEvent('on' + type, cancelBubbleEvent);
-                };
+                //    target.detachEvent('on' + type, cancelBubbleEvent);
+                //};
 
-                target.attachEvent('on' + type, cancelBubbleEvent);
+                //target.attachEvent('on' + type, cancelBubbleEvent);
             }
 
-            target.fireEvent('on' + type, event);
+            element.fireEvent('on' + type, event);
         } catch (error) {
             event.target = element;
 
