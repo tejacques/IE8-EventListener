@@ -1,7 +1,7 @@
 ; (function (define) { define('test', function (require, exports, module) {
     'use strict';
 
-    var storage = require('storage');
+    var storage = require('ie8-eventlistener/storage');
     var ie8eventListener = require('ie8-eventlistener');
 
     //window.storage = storage;
