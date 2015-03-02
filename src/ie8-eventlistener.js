@@ -1,7 +1,7 @@
 ; (function (define) { define('ie8-eventlistener', function (require, exports, module) {
     'use strict';
-    var storage = require('storage');
-    var util = require('storage/util');
+    var storage = require('ie8-eventlistener/storage');
+    var util = require('ie8-eventlistener/storage/util');
     var _storage_key_prefix = util.prefix;
     var _storage_keys_set = util.sent;
     var _storage_key = util.storageKey;
