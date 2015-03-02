@@ -7,7 +7,9 @@
   },
   "main": "src/ie8-eventlistener.js",
   "files": [
-      "."
+      "storage.js",
+      "storage",
+      "src/"
   ],
   "devDependencies": {
     "grunt": "~0.4.5",
