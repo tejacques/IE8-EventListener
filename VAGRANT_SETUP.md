@@ -19,7 +19,7 @@ When the GUI comes up (this step unforunately cannot be automated, as acquiring 
 * Type PowerShell into the search bar
 * Right Click > Run as administrator
 * Enter:
-  ```PowerShell
+```PowerShell
   Set-ExecutionPolicy ByPass -Force
   \\VBOXSVR\vagrant\VAGRANT_VM_SETUP.ps1
   ```
