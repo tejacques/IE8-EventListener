@@ -20,9 +20,9 @@ When the GUI comes up (this step unforunately cannot be automated, as acquiring 
 * Right Click > Run as administrator
 * Enter:
 ```PowerShell
-  Set-ExecutionPolicy ByPass -Force
-  \\VBOXSVR\vagrant\VAGRANT_VM_SETUP.ps1
-  ```
+Set-ExecutionPolicy ByPass -Force
+\\VBOXSVR\vagrant\VAGRANT_VM_SETUP.ps1
+```
 
 VM should now complete setup with Vagrant
 
