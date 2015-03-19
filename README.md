@@ -22,7 +22,7 @@ IE8-EventListener strives to add full addEventListener compliance to IE8. Specif
 * Listeners are executed in the order in which they were added
 * Modifying the event object in one listener does not affect the event object in other listeners
 * Events not present on window in IE8, but that are supported on document are put on the document but triggered with the window context
-* localStorage Storage Events will appear propery in IE8 with the `key`, `newValue`, and `oldValue` properties correctly set as long as `window.storage.setItem` is used instead of `window.localStorage.setItem`. Currently does not support the `storageArea` and `url` properties of Storage Events, but those are rarely used.
+* localStorage Storage Events will appear propery in IE8 with the `key`, `newValue`, and `oldValue` properties correctly set as long as `window['ie8-eventlistener/storage'].setItem` is used instead of `window.localStorage.setItem`. Currently does not support the `storageArea` and `url` properties of Storage Events, but those are rarely used.
 
 Why does it exist?
 ------------------
