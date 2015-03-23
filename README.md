@@ -4,14 +4,10 @@ A polyfill for IE8
 How can I get it?
 -----------------
 
-IE8-EventListener will be available soon through npm and bower and can be installed with the following command:
+IE8-EventListener is available through npm and can be installed with the following command:
 
 ```
 npm install ie8-eventlistener
-```
-
-```
-bower install ie8-eventlistener
 ```
 
 What is it?
