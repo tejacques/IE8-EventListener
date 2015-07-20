@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrifleJS Test</title>
+    <script>
+        // This should log as an unhandled error with:
+        //  'nonexistentVariable' is undefined
+        //  [
+        //    {
+        //      "line": 13,
+        //      "file": "http://path/to/file/below"
+        //    }
+        //  ]
+        nonexistentVariable.shouldFail();
+    </script>
+    <script>
+        // This should callPhantom successfully and print
+        // 'CALLBACK { "hello": "world" }'
+        window.callPhantom({ hello: "world" });
+    </script>
+</head>
+<body>
+</body>
+</html>

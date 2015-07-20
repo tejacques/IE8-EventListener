@@ -19,11 +19,14 @@
         <script src="src/ie8-eventlistener.js"></script>
         <script src="tests/test-ie8-eventlistener.js"></script>
         <script>
-          if (window.mochaPhantomJS) {
-            mochaPhantomJS.run();
-          } else {
-            mocha.run();
-          }
+            console.log("Is mochaPhantomJS around? " + !!window.mochaPhantomJS);
+            window.mpjsExists = !!window.mochaPhantomJS;
+            if (window.mochaPhantomJS) {
+                mochaPhantomJS.thisRan = true;
+                mochaPhantomJS.run();
+            } else {
+                mocha.run();
+            }
         </script>
     </body>
 </html>

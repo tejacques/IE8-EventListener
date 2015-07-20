@@ -1,4 +1,6 @@
+#!/bin/bash
 vbm () {
+
     local timeout=""
     local timeout_param=""
     if [ "$1" == "--timeout" ]

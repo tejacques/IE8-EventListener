@@ -15,6 +15,12 @@ String.prototype.isUpperCase = function() {
     return true;
 };
 
+function sleep(secs) {
+    var ms = secs|0 * 1000;
+    var start = Date.now();
+    while (Date.now() - start < ms);
+}
+
 // PC XT scancodes
 var scancodes = {
     'a':  0x1e,
@@ -200,10 +206,11 @@ type("powershell");
 printcmd(keyDown('LCTR'));
 printcmd(keyDown('LSHIFT'));
 printcmds(keyPress('ENTER'));
-console.log("sleep 2");
 printcmd(keyUp('LSHIFT'));
 printcmd(keyUp('LCTR'));
+console.log("sleep 2");
 printcmds(keyPress('LEFT'));
+console.log("sleep 1");
 printcmds(keyPress('ENTER'));
 console.log("sleep 2");
 type("Set-ExecutionPolicy ByPass -Force\n");

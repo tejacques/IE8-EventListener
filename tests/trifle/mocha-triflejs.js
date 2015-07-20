@@ -86,9 +86,11 @@ Reporter = (function () {
 
     Reporter.prototype.initPage = function () {
         var cookie, i, len, ref;
+        console.log("before create");
         this.page = webpage.create({
             settings: this.config.settings
         });
+        console.log("after create");
         if (this.config.headers) {
             this.page.customHeaders = this.config.headers;
         }
@@ -112,6 +114,8 @@ Reporter = (function () {
         })(this);
         this.page.onError = (function (_this) {
             return function (msg, traces) {
+                console.log(msg);
+                console.log(traces);
                 var file, index, j, len1, line, ref1;
                 if (_this.page.evaluate(function () {
                         return !!window.onerror;
@@ -127,10 +131,15 @@ Reporter = (function () {
                 return _this.fail(msg + "\n\n" + (traces.join('\n')));
             };
         })(this);
-        return (this.page.onInitialized = (function (_this) {
+        console.log("Adding OnInitialized now");
+        this.page.onInitialized = (function (_this) {
             return function () {
                 console.log("adding mochaPhantomJS to page");
-                return _this.page.evaluate(function (env) {
+                var hasCallPhantom = _this.page.evaluate(function () {
+                    return !!window.callPhantom;
+                });
+                console.log('has callPhantom: ' + hasCallPhantom);
+                var res = _this.page.evaluate(function (env) {
                     return (window.mochaPhantomJS = {
                         env: env,
                         failures: 0,
@@ -145,8 +154,10 @@ Reporter = (function () {
                         }
                     });
                 }, system.env);
+                return res;
             };
-        })(this));
+        })(this);
+        console.log("this.page has onInitialized? ", !!this.page.onInitialized);
     };
 
     Reporter.prototype.loadPage = function () {
@@ -161,7 +172,7 @@ Reporter = (function () {
             }
             return _this.waitForInitMocha();
         };
-        return (this.page.onCallback = (function (_this) {
+        this.page.onCallback = (function (_this) {
             return function (data) {
                 console.log('received callback');
                 if (data ? data.hasOwnProperty('Mocha.process.stdout.write') : void 0) {
@@ -175,7 +186,7 @@ Reporter = (function () {
                 }
                 return true;
             };
-        })(this));
+        })(this);
     };
 
     Reporter.prototype.onLoadFailed = function () {
@@ -183,9 +194,11 @@ Reporter = (function () {
     };
 
     Reporter.prototype.injectJS = function () {
+        console.log("injectJS called");
         if (this.page.evaluate(function () {
                 return !!window.mocha;
         })) {
+            console.log("attempting to insert JavaScript");
             this.page.injectJs('mocha-triflejs/core_extensions.js');
             this.page.evaluate(this.customizeMocha, this.customizeOptions());
             return true;
@@ -196,6 +209,7 @@ Reporter = (function () {
     };
 
     Reporter.prototype.runMocha = function () {
+        console.log('runMocha called');
         var base, customReporter, wrappedReporter, wrapper;
         this.page.evaluate(function (config) {
             mocha.useColors(config.useColors);
@@ -265,7 +279,14 @@ Reporter = (function () {
     Reporter.prototype.waitForInitMocha = function () {
         if (!this.checkStarted()) {
             console.log('setTimeout2');
-            return setTimeout(this.waitForInitMocha, 100);
+            console.log('did it exist? ' + this.page.evaluate(function () {
+                return window.mpjsExists;
+            }));
+            return setTimeout(this.waitForInitMocha, 1000);
+        } else {
+            console.log('did it run? ' + this.page.evaluate(function () {
+                return window.mochaPhantomJS.thisRan;
+            }));
         }
     };
 
@@ -280,9 +301,11 @@ Reporter = (function () {
 
     Reporter.prototype.checkStarted = function () {
         var started;
+        console.log("getting status");
         started = this.page.evaluate(function () {
-            return mochaPhantomJS.started;
+            return window.mochaPhantomJS && mochaPhantomJS.started;
         });
+        console.log('started: ' + started + ', doing check');
         if (!started && this.mochaStartWait && this.startTime + this.mochaStartWait < Date.now()) {
             this.fail("Failed to start mocha: Init timeout", 255);
         }
@@ -305,7 +328,9 @@ Reporter = (function () {
     Reporter.prototype.runner = function () {
         var cleanup, error, ref, ref1;
         try {
+            console.debug("trying to run mocha now");
             mochaPhantomJS.runner = mocha.run();
+            console.debug("mochaPhantomJS.runner: " + mochaPhantomJS.runner);
             if (mochaPhantomJS.runner) {
                 cleanup = function () {
                     mochaPhantomJS.failures = mochaPhantomJS.runner.failures;
@@ -319,6 +344,7 @@ Reporter = (function () {
             }
             return !!mochaPhantomJS.runner;
         } catch (_error) {
+            console.error(_error);
             error = _error;
             return false;
         }

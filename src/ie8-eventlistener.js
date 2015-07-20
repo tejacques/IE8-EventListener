@@ -147,6 +147,8 @@
         }
 
         if (!element._events[type]) {
+            // For storage events only
+            var activeTimeout = 0;
             element._events[type] = function (event) {
                 var list = element._events[event.type].list;
                 var events = list.slice();
@@ -215,7 +217,6 @@
                 };
 
                 if (type === "storage" || type === "storagecommit") {
-
                     var setupEventList = function () {
                         var keys = getLocalStorageKeys();
                         var idx = binaryIndexOf.call(keys, _last_key);
@@ -240,22 +241,28 @@
 
                         // Clear out events
                         var now = (+new Date());
-                        var THRESHOLD = (10 * 60 * 1000); // 10 minutes
+                        var TIME_THRESHOLD = (3 * 60 * 1000); // 3 minutes
+                        var INDEX_THRESHOLD = 100;
                         for (i = 0;
-                            i < idx && (idx > 1000 || now - keys[i].timestamp > THRESHOLD) ;
+                            i < idx && (
+                                idx > INDEX_THRESHOLD
+                                || now - keys[i].timestamp > TIME_THRESHOLD) ;
                             i++) {
                             // Raw call to localStorage since we don't ever
                             // want to generate an event for them.
                             window.localStorage.removeItem(keys[i]);
                         }
 
+                        activeTimeout = 0;
                         callEventHandlers();
                     };
 
                     // This setTimeout call is necessary
                     // if it were missing IE8 localStorage
                     // might not have synced across tabs
-                    setTimeout(setupEventList, 0);
+                    if (!activeTimeout) {
+                        activeTimeout = setTimeout(setupEventList, 200);
+                    }
                 } else {
                     eventList.push(null);
                     callEventHandlers();

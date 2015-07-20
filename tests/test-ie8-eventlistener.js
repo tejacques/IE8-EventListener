@@ -101,7 +101,7 @@
                     var listener = function(e) {
                     };
                     document.attachEvent('onstorage', listener);
-                    var expected_events;// = [];
+                    var expected_events;
                     var received_events = 0;
                     var assertions = function(ev) {
                         var i = received_events++;

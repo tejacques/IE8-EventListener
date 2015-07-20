@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrifleJS Test</title>
+</head>
+<body>
+    <script>
+        callPhantom({ hello: 'from script tag' });
+        window.onload = function () {
+            callPhantom({ hello: 'from onload' });
+        }
+    </script>
+</body>
+</html>

@@ -28,6 +28,12 @@ module.exports = function (grunt) {
                 options: {
                     stdin: false
                 }
+            },
+            vagrantSetup: {
+                command: 'bash scripts/setup_vm.sh & bash vagrant up',
+                options: {
+                    stdin: false
+                }
             }
         }
     });
@@ -38,4 +44,5 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', ['connect', 'watch']);
     grunt.registerTask('test', ['connect', 'shell:trifle']);
+    grunt.registerTask('setup', ['shell:vagrantSetup']);
 };
