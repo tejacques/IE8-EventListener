@@ -129,6 +129,49 @@
         return (target === window || target instanceof Window);
     };
 
+    var getEventsSinceKey = function (key) {
+        var keys = getLocalStorageKeys();
+        var idx = binaryIndexOf.call(keys, key);
+        var eventList = [];
+        // If the index is negative, bit flip it to get
+        // the insersion point. If the key is old, we'll
+        // start from the first element. If the key is new
+        // but has been removed already, we'll start at the
+        // end of the keys.
+        if (idx < 0) {
+            idx = ~idx;
+        } else {
+            idx++;
+        }
+        var i;
+
+        for (i = idx; i < keys.length; i++) {
+            key = keys[i].key;
+            var item = JSON.parse(storage.getItem(key));
+            _last_key = key;
+            eventList.push(item);
+        }
+
+        // Clear out events
+        var now = (+new Date());
+        var TIME_THRESHOLD = (3 * 60 * 1000); // 3 minutes
+        var INDEX_THRESHOLD = 100;
+        for (i = 0;
+            i < idx && (
+                idx > INDEX_THRESHOLD
+                || now - keys[i].timestamp > TIME_THRESHOLD) ;
+            i++) {
+            // Raw call to localStorage since we don't ever
+            // want to generate an event for them.
+            window.localStorage.removeItem(keys[i]);
+        }
+
+        return {
+            events: eventList,
+            latestKey: key
+        };
+    };
+
     addToPrototype('addEventListener', function (type, listener) {
         if (!listener
             || typeof listener !== 'function') {
@@ -149,9 +192,11 @@
         if (!element._events[type]) {
             // For storage events only
             var activeTimeout = 0;
+            var nextTimeout = false;
+            var lastKey = _last_key;
             element._events[type] = function (event) {
                 var list = element._events[event.type].list;
-                var events = list.slice();
+                var events = list;
                 var index = -1;
                 var length = events.length;
                 var eventElement;
@@ -205,65 +250,49 @@
                                 evnt.oldValue = ev.oldValue;
                                 evnt.newValue = ev.newValue;
                             }
-                            if (index in events) {
-                                eventElement = events[index];
-                                var idOf = indexOf(list, eventElement);
-                                if (idOf !== -1) {
-                                    eventElement.call(element, evnt);
-                                }
-                            }
+
+                            eventElement = events[index];
+                            eventElement.call(element, evnt);
                         }
                     }
                 };
 
                 if (type === "storage" || type === "storagecommit") {
+
                     var setupEventList = function () {
-                        var keys = getLocalStorageKeys();
-                        var idx = binaryIndexOf.call(keys, _last_key);
-                        // If the index is negative, bit flip it to get
-                        // the insersion point. If the key is old, we'll
-                        // start from the first element. If the key is new
-                        // but has been removed already, we'll start at the
-                        // end of the keys.
-                        if (idx < 0) {
-                            idx = ~idx;
-                        } else {
-                            idx++;
-                        }
-                        var i;
+                        var latestEvents = getEventsSinceKey(lastKey);
+                        lastKey = latestEvents.latestKey;
+                        eventList = latestEvents.events;
+                        console.log('Got ' + latestEvents.events.length + ' keys');
 
-                        for (i = idx; i < keys.length; i++) {
-                            var key = keys[i].key;
-                            var item = JSON.parse(storage.getItem(key));
-                            _last_key = key;
-                            eventList.push(item);
-                        }
-
-                        // Clear out events
-                        var now = (+new Date());
-                        var TIME_THRESHOLD = (3 * 60 * 1000); // 3 minutes
-                        var INDEX_THRESHOLD = 100;
-                        for (i = 0;
-                            i < idx && (
-                                idx > INDEX_THRESHOLD
-                                || now - keys[i].timestamp > TIME_THRESHOLD) ;
-                            i++) {
-                            // Raw call to localStorage since we don't ever
-                            // want to generate an event for them.
-                            window.localStorage.removeItem(keys[i]);
-                        }
-
-                        activeTimeout = 0;
                         callEventHandlers();
+                    };
+
+                    var timeout = function(delay) {
+                        setTimeout(setupEventList, 0);
+                        return setTimeout(function() {
+                            activeTimeout = 0;
+                            if (nextTimeout) {
+                                nextTimeout = false;
+                                activeTimeout = timeout(delay);
+                            }
+                        }, delay);
                     };
 
                     // This setTimeout call is necessary
                     // if it were missing IE8 localStorage
                     // might not have synced across tabs
-                    if (!activeTimeout) {
-                        activeTimeout = setTimeout(setupEventList, 200);
+                    if (!activeTimeout || !nextTimeout) {
+                        if (!activeTimeout) {
+                            activeTimeout = timeout(200);
+                        } else if (!nextTimeout) {
+                            nextTimeout = true;
+                        }
+
                     }
                 } else {
+                    // This is necessary because we want to process one
+                    // event, but it doesn't have any storage data on it
                     eventList.push(null);
                     callEventHandlers();
                 }

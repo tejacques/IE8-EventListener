@@ -6,6 +6,23 @@
     var _storage_key = utils.storageKey;
     var _storage_key_timeout = utils.timeout;
 
+    var queuedRemovals = [];
+    var queueTimeout = 0;
+    var queueRemoval = function(key) {
+        queuedRemovals.push(key);
+
+        if (!queueTimeout) {
+            setTimeout(function() {
+                queueTimeout = 0;
+                for(var i = 0; i < queuedRemovals.length; i++) {
+                    window.localStorage.removeItem(queuedRemovals[i]);
+                }
+
+                queuedRemovals = [];
+            }, _storage_key_timeout);
+        }
+    };
+
     var storageSetItem = function (key, val) {
         var oldValue = window.localStorage.getItem(key);
         if (val === undefined) {
@@ -19,9 +36,7 @@
                 newValue: (val === null) ? null : val.toString()
             }));
 
-            setTimeout(function () {
-                window.localStorage.removeItem(storageKey);
-            }, _storage_key_timeout);
+            queueRemoval(storageKey);
         }
     };
 
