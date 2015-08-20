@@ -19,7 +19,9 @@
         <script src="src/ie8-eventlistener.js"></script>
         <script src="tests/test-ie8-eventlistener.js"></script>
         <script>
-            console.log("Is mochaPhantomJS around? " + !!window.mochaPhantomJS);
+            if (window.console) {
+                console.log("Is mochaPhantomJS around? " + !!window.mochaPhantomJS);
+            }
             window.mpjsExists = !!window.mochaPhantomJS;
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.thisRan = true;

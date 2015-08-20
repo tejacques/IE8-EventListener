@@ -263,7 +263,6 @@
                         var latestEvents = getEventsSinceKey(lastKey);
                         lastKey = latestEvents.latestKey;
                         eventList = latestEvents.events;
-                        console.log('Got ' + latestEvents.events.length + ' keys');
 
                         callEventHandlers();
                     };
